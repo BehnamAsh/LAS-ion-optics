@@ -1,0 +1,281 @@
+; Note: "fill" would work just as well as "rotate_fill" in the
+; 2D case, though the latter works in both 2D and 3D cases.
+
+# local inch = 25.4  -- Conversion factor
+
+# --- Sample Holder ----------------------------------
+
+# local H_length = 2		-- 10mm thickness of sample holder
+# local H_radius = 25 	        -- 25mm radius of sample holder
+
+# local source_aperture_gap = 6
+
+# -- Lens --------------------------------------
+
+# local Lens_length = 3		-- 3mm thickness of electrodes
+# local Lens_radius_out = 15 	-- 15mm outer radius
+# local Lens_radius_in = 7.5 	-- 7.5mm inner radius
+#-- So A/D (lens length to inner radius) is 0.5
+
+# -- Spacing/dimensions ------------------------------
+
+# local gap = 9.5
+# local dx = 0.5
+# local x_offset = 0.0
+# local y_offset = 0.0
+# local r_offset = 0.0     -- This offset is to adjust the RFQ optics
+# local gap_bender_holder = Lens_length+1.7625 + 23.8125 + 11 -- distance between start of last ring electrode and mid-bender box (11 is offset to fit CF flange)
+# local cross_center = 0.0
+
+# -- Circular electrode -------------------- 
+
+# local cir_r = 12.7
+# local cir_l = 38
+# local cir_cut = 0.889
+# local cir_separation = 33
+# local cir_box_l = 47.625
+# local cir_box_h = 50
+# local cir_slit_w = 7.6
+# local cir_slit_h = 25
+# local bender_slit_offset = 30    -- 30mm is the length to put every component started from slit exit point
+
+# -- Hint: the optimum ratio of r/r0 is 1.1486 and mine is 1.1537 -----  
+
+# -- Tube -------------------- After bender, it needs to have (cir_box_l)/2 + 30mm distance to match slit exit point 
+
+# local Tube_length = 30        -- 30mm thickness of electrodes
+# local Tube_radius_out = 20 	-- 13mm outer radius
+# local Tube_radius_in = 3 	-- 3mm inner radius
+
+
+# -- Gate valve dimenssion --------------------
+
+# local GV_length = 61.2        -- 61.2mm thickness of electrodes
+# local GV_radius_out = 35 	-- 65mm outer radius
+# local GV_radius_in = 30 	-- 30mm inner radius
+
+
+
+# -- Einzel lens -------------------- 
+
+# local Einz_length = 30        -- 30mm thickness of electrodes
+# local Einz_radius_out = 15 	-- 15mm outer radius
+# local Einz_radius_in = 7.5 	-- 7.5mm inner radius
+
+
+# --------------------------------------------
+
+;----------# local nx = math.floor((holder_length+4*gap+5*lens_length+source_aperture_gap+gap_LPT2+gap_LPT1+gap_bender_source+5)/dx)+100
+;----------# local nz = math.floor(2.37*25.4/dx) + 5
+;----------# local ny = nz 
+
+pa_define(300,820,300,p,none,electrostatic,$(dx),$(dx),$(dx), surface=fractional)
+
+
+
+# -- Sample Holder ---------------------------
+locate($(x_offset),30,80,1,0,0,0){
+e(1) { rotate_fill(360) { within { polyline(0.1,0, 1,0, 1,5, 3,5, 6.35,13, 6.35,15, 0.1,15) } 
+                         }   
+      }
+# x_offset = x_offset + gap/2 +6.3375
+
+# -- 5 Extraction Electrodes ---------------------------
+e(2) { rotate_fill(360) { within { polyline($(x_offset),7.5, $(x_offset+2),7.5, $(x_offset+4.7625),14.2, $(x_offset+4.7625),15, $(x_offset),15 ) } } }
+# x_offset = x_offset + gap
+e(3) { rotate_fill(360) { within { box( $(x_offset),$(Lens_radius_in), $(x_offset+Lens_length+1.7625),$(Lens_radius_out)) } } }
+# x_offset = x_offset + gap
+e(4) { rotate_fill(360) { within { box( $(x_offset),$(Lens_radius_in), $(x_offset+Lens_length+1.7625),$(Lens_radius_out)) } } }
+# x_offset = x_offset + gap
+e(5) { rotate_fill(360) { within { box( $(x_offset),$(Lens_radius_in), $(x_offset+Lens_length+1.7625),$(Lens_radius_out)) } } }
+# x_offset = x_offset + gap
+e(6) { rotate_fill(360) { within { box( $(x_offset),$(Lens_radius_in), $(x_offset+Lens_length+1.7625),$(Lens_radius_out)) } } }
+
+# x_offset = x_offset + gap_bender_holder
+# cross_center = x_offset
+}
+
+
+# --Bender--------------------------------------- 
+
+locate($(x_offset),30,80,1,0,0,0){
+
+locate($(cir_separation/2.0),$(cir_separation/2.0),0, 1, 0,180,0){
+e(10) { fill { within { circle( 0,0, $(cir_r),$(cir_r)) 
+						 box3d(0,0,$(-cir_l/2.0),$(cir_r),$(cir_r),$(cir_l/2.0) ) }  
+notin {polyline(-0.1,-0.1,-0.1,$(cir_r-7),$(cir_r-7),-0.1)}
+}}
+}
+
+locate($(cir_separation/2.0),$(-cir_separation/2.0),0, 1, 0,90,0){
+e(20) { fill { within { circle( 0,0, $(cir_r),$(cir_r)) 
+						 box3d(0,0,$(-cir_l/2.0),$(cir_r),$(cir_r),$(cir_l/2.0) ) }  
+notin {polyline(-0.1,-0.1,-0.1,$(cir_r-7),$(cir_r-7),-0.1)}
+}}
+}
+
+locate($(-cir_separation/2.0),$(cir_separation/2.0),0, 1, 0,270,0){
+e(30) { fill { within { circle( 0,0, $(cir_r),$(cir_r)) 
+						 box3d(0,0,$(-cir_l/2.0),$(cir_r),$(cir_r),$(cir_l/2.0) ) }  
+notin {polyline(-0.1,-0.1,-0.1,$(cir_r-7),$(cir_r-7),-0.1)} 
+}}
+}
+
+locate($(-cir_separation/2.0),$(-cir_separation/2.0),0, 1, 0,0,0){
+e(40) { fill { within { circle( 0,0, $(cir_r),$(cir_r)) 
+						 box3d(0,0,$(-cir_l/2.0),$(cir_r),$(cir_r),$(cir_l/2.0) ) }  
+notin {polyline(-0.1,-0.1,-0.1,$(cir_r-7),$(cir_r-7),-0.1)}
+}}
+}
+
+
+e(50) { fill { within { box3d($(-cir_box_l/2.0),$(-cir_box_l/2.0),$(-cir_box_h/2.0),$(cir_box_l/2.0),$(cir_box_l/2.0),$(cir_box_h/2.0) )
+}
+
+  notin { box3d($(-cir_box_l/2.0+0.125*inch),$(-cir_box_l/2.0+0.125*inch),$(-cir_box_h/2.0+0.125*inch),$(cir_box_l/2.0-0.125*inch),$(cir_box_l/2.0-0.125*inch), $(cir_box_h/2.0-0.125*inch) ) }	   
+  notin { box3d($(-cir_box_l/2.0-0.125*inch),$(-cir_slit_w/2.0),$(-cir_slit_h/2.0),$(cir_box_l/2.0+0.125*inch),$(cir_slit_w/2.0),$(cir_slit_h/2.0) ) }	   
+  notin { box3d($(-cir_slit_w/2.0),$(-cir_box_l/2.0-0.125*inch),$(-cir_slit_h/2.0),$(cir_slit_w/2.0),$(cir_box_l/2.0+0.125*inch),$(cir_slit_h/2.0) ) }
+
+  notin { box3d($(-cir_box_l/2.0 -1),$(-cir_box_l/2.0 -1),$(-cir_box_h/2.0-1),$(-cir_box_l/2.0 +9),$(-cir_box_l/2.0 +9),$(cir_box_h/2.0+1) ) }
+  notin { box3d($(-cir_box_l/2.0 -1),$(cir_box_l/2.0 -9),$(-cir_box_h/2.0-1),$(-cir_box_l/2.0 +9),$(cir_box_l/2.0 +1),$(cir_box_h/2.0+1) ) }
+  notin { box3d($(cir_box_l/2.0 -9),$(-cir_box_l/2.0 -1),$(-cir_box_h/2.0-1),$(cir_box_l/2.0 +1),$(-cir_box_l/2.0 +9),$(cir_box_h/2.0+1) ) }
+  notin { box3d($(cir_box_l/2.0 -9),$(cir_box_l/2.0 -9),$(-cir_box_h/2.0-1),$(cir_box_l/2.0 +1),$(cir_box_l/2.0 +1),$(cir_box_h/2.0+1) ) }
+
+	    	  }}
+
+}
+
+# -- Cylindrical electode (90 degree 4-way cross) -----------------------------
+
+locate($(x_offset),$(cir_box_l/2.0+bender_slit_offset+4),80,1,0,90,0){
+e(100) { rotate_fill(360) { within { box($(y_offset),$(Lens_radius_in), $(y_offset+12*Lens_length),$(Lens_radius_out)) } } }
+e(101) { rotate_fill(360) { within { box($(y_offset+13*Lens_length),$(Lens_radius_in), $(y_offset+18*Lens_length),$(Lens_radius_out)) } } }
+e(102) { rotate_fill(360) { within { box($(y_offset+19*Lens_length),$(Lens_radius_in), $(y_offset+31*Lens_length),$(Lens_radius_out)) } } }
+}
+
+
+# -- Gate valve + 12" CF Flange -----------------------------
+
+locate($(x_offset),$(cir_box_l/2.0+bender_slit_offset+85),80,1,0,90,0){
+e(400) { rotate_fill(360) { within { box($(y_offset),$(GV_radius_in), $(y_offset+GV_length+50),$(GV_radius_out)) } 
+                           } }
+}
+
+
+# -- RFQ Capture optics--------------------
+locate($(x_offset),$(cir_box_l/2.0+bender_slit_offset+155),80,1,0,90,0){
+e(111) { rotate_fill(360) { within { polyline($(r_offset),5, $(r_offset),20 , 1,20 ,1,4) } } }
+# r_offset = r_offset + 1
+e(112) { rotate_fill(360) { within { box( $(r_offset), 5, $(r_offset+10),20) } } }
+# r_offset = r_offset + 11
+e(113) { rotate_fill(360) { within { box( $(r_offset), 5, $(r_offset+10),20) } } }
+# r_offset = r_offset + 11
+e(114) { rotate_fill(360) { within { box( $(r_offset), 5, $(r_offset+10),20) } } }
+# r_offset = r_offset + 11
+e(115) { rotate_fill(360) { within { box( $(r_offset), 5, $(r_offset+10),20) } } }
+# r_offset = r_offset + 22
+e(116) { rotate_fill(360) { within { box( $(r_offset), 5, $(r_offset+10),20) } } }
+# r_offset = r_offset + 14
+e(117) { rotate_fill(360) { within { box( $(r_offset), 5, $(r_offset+1),20) } } }
+# r_offset = r_offset + 4
+e(118) { rotate_fill(360) { within { box( $(r_offset), 5, $(r_offset+1),20) } } }
+# r_offset = r_offset + 4 
+e(119) { rotate_fill(360) { within { box( $(r_offset), 5, $(r_offset+1),20) } } }
+# r_offset = r_offset + 4
+e(120) { rotate_fill(360) { within { box( $(r_offset), 5, $(r_offset+1),20) } } }
+}
+
+
+# -- Steerer --------------------
+
+locate($(x_offset),$(cir_box_l/2.0+bender_slit_offset+5+200),80,1,0,0,90){
+
+locate(12.5,0,0, 1, 0,180,0){
+e(201) { fill { within { circle( 0,0, 7.5,7.5) 
+						 box3d($(-cir_r),$(-cir_r),-5,$(cir_r),$(cir_r),5 ) }  
+}}
+}
+
+locate(-12.5,0,0, 1, 0,90,0){
+e(202) { fill { within { circle( 0,0, 7.5,7.5) 
+						 box3d($(-cir_r),$(-cir_r),-5,$(cir_r),$(cir_r),5 ) }  
+}}
+}
+
+locate(0,12.5,0, 1, 0,270,0){
+e(203) { fill { within { circle( 0,0, 7.5,7.5) 
+						 box3d($(-cir_r),$(-cir_r),-5,$(cir_r),$(cir_r),5 ) }  
+}}
+}
+
+locate(0,-12.5,0, 1, 0,0,0){
+e(204) { fill { within { circle( 0,0, 7.5,7.5) 
+						 box3d($(-cir_r),$(-cir_r),-5,$(cir_r),$(cir_r),5 ) }  
+}}
+}
+
+}
+
+# -- RFQ rods -------------------- e(301) & e(302) are opposite to each other
+
+locate($(x_offset),$(cir_box_l/2.0+bender_slit_offset+5+292),80,1,0,0,90){
+
+locate(11.5,0,0, 1, 0,180,0){
+e(301) { fill { within { circle( 0,0, 6.5,6.5) 
+						 box3d($(-cir_r),$(-cir_r),-37.5,$(cir_r),$(cir_r),37.5 ) }  
+}}
+}
+
+locate(-11.5,0,0, 1, 0,90,0){
+e(302) { fill { within { circle( 0,0, 6.5,6.5) 
+						 box3d($(-cir_r),$(-cir_r),-37.5,$(cir_r),$(cir_r),37.5 ) }  
+}}
+}
+
+locate(0,11.5,0, 1, 0,270,0){
+e(303) { fill { within { circle( 0,0, 6.5,6.5) 
+						 box3d($(-cir_r),$(-cir_r),-37.5,$(cir_r),$(cir_r),37.5 ) }  
+}}
+}
+
+locate(0,-11.5,0, 1, 0,0,0){
+e(304) { fill { within { circle( 0,0, 6.5,6.5) 
+						 box3d($(-cir_r),$(-cir_r),-37.5,$(cir_r),$(cir_r),37.5 ) }  
+}}
+}
+
+}
+
+
+# -- RFQ rods tube + optics -----------------------------
+
+locate($(x_offset),$(cir_box_l/2.0+bender_slit_offset+270),80,1,0,90,0){
+e(311) { rotate_fill(360) { within { polyline(-30,6.2625, -30,33.6 , -23.65,33.6 , -23.65,1.5) } } }
+e(312) { rotate_fill(360) { within { polyline(-21,3.5875, -21,33.6 , -19.5,33.6 , -19.5,2) } } }
+e(313) { rotate_fill(360) { within { polyline(-13.15,2.3375 , -13.15,33.6 , -11.65,33.6 , -11.65,1.5) } } }
+
+
+e(300) { rotate_fill(360) { within { box($(y_offset-11),24, $(y_offset+64),25) }  } }
+
+e(314) { rotate_fill(360) { within { box( $(y_offset+64), 1.75, $(y_offset+65),33.6) } } }
+e(315) { rotate_fill(360) { within { box( $(y_offset+65), 2.5, $(y_offset+66),33.6) } } }
+
+}
+
+# -- Matchpoint tube -----------------------------
+
+locate($(x_offset),$(cir_box_l/2.0+bender_slit_offset+340),80,1,0,90,0){
+e(600) { rotate_fill(360) { within { box(0,$(Tube_radius_in/2), $(Tube_length/3),$(Tube_radius_out+12)) }
+                            notin { box(2,$(Tube_radius_in/2), $(Tube_length/3+1),$(Tube_radius_out+10)) }  } }
+                         
+}
+
+
+
+# -- Shielding tubes -----------------------------
+
+locate(0,30,80,1,0,0,0){
+e(1000) { rotate_fill(360) { within { box( 0,$(H_radius+1),$(H_length+5*Lens_length+4*gap),$(H_radius+3)) }
+} }
+}
+
